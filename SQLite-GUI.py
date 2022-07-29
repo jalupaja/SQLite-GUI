@@ -117,8 +117,13 @@ def db_commit():
     con.commit()
 
 
-if __name__=="__main__":
-    app = QApplication(sys.argv)
+def main(databaseLink, sys_argv=""):
+    global con
+    global db
+    global qTable
+    global tableButtons
+
+    app = QApplication(sys_argv)
     window = QWidget()
     layout = QVBoxLayout(window)
     try:
@@ -162,3 +167,10 @@ if __name__=="__main__":
 
     window.show()
     sys.exit(app.exec_())
+
+
+if __name__=="__main__":
+    if len(sys.argv) > 1:
+        main(sys.argv[1], sys.argv)
+    else:
+        print_error("You have to give a link to the database")
