@@ -122,6 +122,7 @@ def main(databaseLink, sys_argv=""):
     global db
     global qTable
     global tableButtons
+    global lbl_sql_ret
 
     app = QApplication(sys_argv)
     window = QWidget()
