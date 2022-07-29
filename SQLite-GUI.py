@@ -34,6 +34,7 @@ def tableButtonsChanged():
     selected_table = __get_selected_table()
     if selected_table == None:
         tableButtons[0].toggle()
+        return
 
     qTable.clear()
     data = db_execute(f"SELECT rowid,* FROM {selected_table}")
@@ -122,6 +123,7 @@ def main(databaseLink, sys_argv=""):
     global db
     global qTable
     global tableButtons
+    global txt_sql_field
     global lbl_sql_ret
 
     app = QApplication(sys_argv)
