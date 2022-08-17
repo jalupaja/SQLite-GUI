@@ -36,34 +36,44 @@ def tableButtonsChanged():
         tableButtons[0].toggle()
         return
 
+    global renewing_table
+    renewing_table = True
+
     qTable.clear()
     data = db_execute(f"SELECT rowid,* FROM {selected_table}")
     cols = data.description
     rows = data.fetchall()
 
-    qTable.setColumnCount(len(data.description))
-    qTable.setRowCount(len(rows))
-
+    colLen = 0
     headers = []
-    for header in cols:
-        headers.append(header[0])
+    rowid_changed = 0
+    for i in range(len(cols)):
+        if cols[i][0] in headers:
+            headers.pop(0)
+            rowid_changed = 1
+        else:
+            colLen += 1
+        headers.append(cols[i][0])
+
+    qTable.setColumnCount(colLen)
+    qTable.setRowCount(len(rows))
     qTable.setHorizontalHeaderLabels(headers)
 
     rowLen = len(rows)
     if rowLen:
-        colLen = len(rows[0])
         for rowCount in range(rowLen):
             for colCount in range(colLen):
-                nItem = QTableWidgetItem(str(rows[rowCount][colCount]))
+                nItem = QTableWidgetItem(str(rows[rowCount][colCount + rowid_changed]))
                 qTable.setItem(rowCount, colCount, nItem)
                 if colCount == 0:
                     nItem.setFlags(nItem.flags() & Qt.ItemIsEditable)
             rowCount += 1
+    renewing_table = False
 
 
 def cellChanged(x, y):
     # fix for weird error when using tableButtonsChanged()
-    if qTable.horizontalHeaderItem(y) == None:
+    if renewing_table or qTable.horizontalHeaderItem(y) is None:
         return
 
     # check if there are other cells in the same column that had the same text
