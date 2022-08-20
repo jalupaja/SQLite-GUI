@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget,QTableWidgetItem,QVBoxLayout,QRadioButton,QTextEdit,QLabel,QPushButton,QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QVBoxLayout, QRadioButton, QTextEdit, QLabel, QPushButton, QMessageBox
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot, Qt
 import sys
@@ -61,7 +61,7 @@ def tableButtonsChanged():
     cols = data.description
     rows = data.fetchall()
 
-    colLen = 0
+    colLen = 1
     headers = []
     rowid_changed = 0
     for i in range(len(cols)):
@@ -71,6 +71,7 @@ def tableButtonsChanged():
         else:
             colLen += 1
         headers.append(cols[i][0])
+    headers.append(" ")
 
     qTable.setColumnCount(colLen)
     qTable.setRowCount(len(rows))
@@ -80,13 +81,19 @@ def tableButtonsChanged():
     if rowLen:
         for rowCount in range(rowLen):
             for colCount in range(colLen):
-                nItem = QTableWidgetItem()
-                nItem.setData(Qt.DisplayRole, rows[rowCount][colCount + rowid_changed])
-                qTable.setItem(rowCount, colCount, nItem)
-                if colCount == 0:
-                    nItem.setFlags(nItem.flags() & Qt.ItemIsEditable)
+                if colCount + 1 == colLen:
+                    btn_del = QPushButton("x", qTable)
+                    btn_del.clicked.connect(btn_push_del)
+                    qTable.setCellWidget(rowCount, colCount, btn_del)
+                else:
+                    nItem = QTableWidgetItem()
+                    nItem.setData(Qt.DisplayRole, rows[rowCount][colCount + rowid_changed])
+                    qTable.setItem(rowCount, colCount, nItem)
+                    if colCount == 0:
+                        nItem.setFlags(nItem.flags() & Qt.ItemIsEditable)
             rowCount += 1
     renewing_table = False
+    qTable.sortByColumn(0, Qt.AscendingOrder)
     __update_search()
 
 
@@ -102,11 +109,11 @@ def cellChanged(x, y):
         return
 
     if len(others) > 1 and others[0][0]:
-        msgBox = QMessageBox()
-        msgBox.setText(f"There are {len(others) - 1} other items in '{qTable.horizontalHeaderItem(y).text()}'.\nDo you want to change all of them too?")
-        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
-        msgBox.setDefaultButton(QMessageBox.No)
-        res = msgBox.exec()
+        msg_box = QMessageBox()
+        msg_box.setText(f"There are {len(others) - 1} other items in '{qTable.horizontalHeaderItem(y).text()}'.\nDo you want to change all of them too?")
+        msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+        msg_box.setDefaultButton(QMessageBox.No)
+        res = msg_box.exec()
         if res == QMessageBox.Yes:
             db_execute(f"UPDATE {__get_selected_table()} SET {qTable.horizontalHeaderItem(y).text()}='{qTable.item(x, y).text()}' WHERE {qTable.horizontalHeaderItem(y).text()}='{str(others[0][0])}'")
             db_commit()
@@ -121,6 +128,20 @@ def cellChanged(x, y):
         __update_search()
     db_execute(f"UPDATE {__get_selected_table()} SET {qTable.horizontalHeaderItem(y).text()}='{qTable.item(x, y).text()}' WHERE rowid={qTable.item(x, 0).text()}")
     db_commit()
+
+
+def btn_push_del():
+    row = qTable.currentIndex().row()
+    msg_box = QMessageBox()
+    msg_box.setIcon(QMessageBox.Critical)
+    msg_box.setText("Do you really want to delete the row?")
+    msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+    msg_box.setDefaultButton(QMessageBox.Yes)
+    res = msg_box.exec()
+    if res == QMessageBox.Yes:
+        db_execute(f"DELETE FROM {__get_selected_table()} WHERE rowid={qTable.item(row, 0).text()}")
+        db_commit()
+        qTable.removeRow(row)
 
 
 def btn_push_sql():
@@ -199,9 +220,9 @@ def main(databaseLink, sys_argv=""):
     lbl_sql_ret.setTextFormat(Qt.MarkdownText)
     layout.addWidget(lbl_sql_ret)
 
-    btnSQL = QPushButton("Execute")
-    btnSQL.clicked.connect(btn_push_sql)
-    layout.addWidget(btnSQL)
+    btn_sql = QPushButton("Execute")
+    btn_sql.clicked.connect(btn_push_sql)
+    layout.addWidget(btn_sql)
 
     if len(tableButtons) > 0:
         tableButtons[0].toggle()
