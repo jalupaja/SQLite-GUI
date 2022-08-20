@@ -125,7 +125,7 @@ def cellChanged(x, y):
             qTable.cellChanged.connect(cellChanged)
             return
 
-        __update_search()
+    __update_search()
     db_execute(f"UPDATE {__get_selected_table()} SET {qTable.horizontalHeaderItem(y).text()}='{qTable.item(x, y).text()}' WHERE rowid={qTable.item(x, 0).text()}")
     db_commit()
 
