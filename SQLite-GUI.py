@@ -2,7 +2,7 @@
 
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget,QTableWidgetItem,QVBoxLayout,QRadioButton,QTextEdit,QLabel,QPushButton,QMessageBox
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import pyqtSlot,Qt
+from PyQt5.QtCore import pyqtSlot, Qt
 import sys
 import sqlite3
 
@@ -63,7 +63,8 @@ def tableButtonsChanged():
     if rowLen:
         for rowCount in range(rowLen):
             for colCount in range(colLen):
-                nItem = QTableWidgetItem(str(rows[rowCount][colCount + rowid_changed]))
+                nItem = QTableWidgetItem()
+                nItem.setData(Qt.DisplayRole, rows[rowCount][colCount + rowid_changed])
                 qTable.setItem(rowCount, colCount, nItem)
                 if colCount == 0:
                     nItem.setFlags(nItem.flags() & Qt.ItemIsEditable)
