@@ -21,6 +21,23 @@ class TableView(QTableWidget):
         self.cellChanged.connect(cellChanged)
 
 
+def search(search):
+    if search == "":
+        for row in range(qTable.rowCount()):
+            qTable.setRowHidden(row, False)
+    else:
+        items = qTable.findItems(search, Qt.MatchRegularExpression)
+        searched_rows = []
+        for i in items:
+            searched_rows.append(i.row())
+        for row in range(qTable.rowCount()):
+            qTable.setRowHidden(row, row not in searched_rows)
+
+
+def __update_search():
+    search(txt_search.toPlainText())
+
+
 def __get_selected_table():
     for btn in tableButtons:
         if btn.isChecked():
@@ -70,6 +87,7 @@ def tableButtonsChanged():
                     nItem.setFlags(nItem.flags() & Qt.ItemIsEditable)
             rowCount += 1
     renewing_table = False
+    __update_search()
 
 
 def cellChanged(x, y):
@@ -100,6 +118,7 @@ def cellChanged(x, y):
             qTable.cellChanged.connect(cellChanged)
             return
 
+        __update_search()
     db_execute(f"UPDATE {__get_selected_table()} SET {qTable.horizontalHeaderItem(y).text()}='{qTable.item(x, y).text()}' WHERE rowid={qTable.item(x, 0).text()}")
     db_commit()
 
@@ -133,8 +152,9 @@ def db_commit():
 def main(databaseLink, sys_argv=""):
     global con
     global db
-    global qTable
     global tableButtons
+    global txt_search
+    global qTable
     global txt_sql_field
     global lbl_sql_ret
 
@@ -156,6 +176,13 @@ def main(databaseLink, sys_argv=""):
         btn.clicked.connect(tableButtonsChanged)
         tableButtons.append(btn)
         layout.addWidget(btn)
+
+    txt_search = QTextEdit("")
+    txt_search.setAcceptRichText(False)
+    txt_search.setPlaceholderText("search via RegEx: ")
+    txt_search.setMaximumHeight(25)
+    txt_search.textChanged.connect(__update_search)
+    layout.addWidget(txt_search)
 
     qTable = TableView()
     layout.addWidget(qTable)
