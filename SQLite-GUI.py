@@ -101,7 +101,7 @@ def cellChanged(x, y):
     except:
         return
 
-    if len(others) > 1 and not others[0]:
+    if len(others) > 1 and others[0][0]:
         msgBox = QMessageBox()
         msgBox.setText(f"There are {len(others) - 1} other items in '{qTable.horizontalHeaderItem(y).text()}'.\nDo you want to change all of them too?")
         msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
