@@ -57,7 +57,7 @@ def tableButtonsChanged():
     renewing_table = True
 
     qTable.clear()
-    data = db_execute(f"SELECT rowid,* FROM {selected_table}")
+    data = db_execute(f"SELECT rowid,* FROM '{selected_table}'")
     cols = data.description
     rows = data.fetchall()
 
@@ -104,7 +104,7 @@ def cellChanged(x, y):
 
     # check if there are other cells in the same column that had the same text
     try:
-        others = db_execute(f"SELECT {qTable.horizontalHeaderItem(y).text()} FROM {__get_selected_table()} WHERE {qTable.horizontalHeaderItem(y).text()}=(SELECT {qTable.horizontalHeaderItem(y).text()} FROM {__get_selected_table()} WHERE rowid={qTable.item(x, 0).text()})").fetchall()
+        others = db_execute(f"SELECT {qTable.horizontalHeaderItem(y).text()} FROM '{__get_selected_table()}' WHERE {qTable.horizontalHeaderItem(y).text()}=(SELECT {qTable.horizontalHeaderItem(y).text()} FROM '{__get_selected_table()}' WHERE rowid={qTable.item(x, 0).text()})").fetchall()
     except:
         return
 
@@ -139,7 +139,7 @@ def btn_push_del():
     msg_box.setDefaultButton(QMessageBox.StandardButton.Yes)
     res = msg_box.exec()
     if res == QMessageBox.StandardButton.Yes:
-        db_execute(f"DELETE FROM {__get_selected_table()} WHERE rowid={qTable.item(row, 0).text()}")
+        db_execute(f"DELETE FROM '{__get_selected_table()}' WHERE rowid={qTable.item(row, 0).text()}")
         db_commit()
         qTable.removeRow(row)
 
