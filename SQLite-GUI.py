@@ -66,7 +66,6 @@ def tablesChanged():
 
 def tableButtonsChanged():
     global qTable
-    print("!")
 
     selected_table = __get_selected_table()
 
